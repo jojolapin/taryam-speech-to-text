@@ -1,0 +1,14 @@
+# Whisper Bridge
+openai>=1.0.0
+google-genai
+python-dotenv
+PySide6
+keyboard
+sounddevice
+soundfile
+pyperclip
+pyautogui
+pywin32
+
+# Local Whisper (optional; only needed when using Engine → Local Whisper)
+openai-whisper
