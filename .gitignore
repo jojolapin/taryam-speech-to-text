@@ -1,0 +1,17 @@
+# Environment and secrets
+.venv/
+.env
+.env.local
+
+# IDE
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Optional backup (uncomment to track)
+# whisper_bridge - Copy.py
