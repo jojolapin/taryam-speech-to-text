@@ -14,7 +14,7 @@ Whisper Bridge is a **floating speech-to-text widget for Windows**. It records f
 
 ### Quick start
 
-**Windows (recommended on a new PC):** if the repo includes the root scripts `projectsetup.bat`, `run.bat`, and `build.bat`, double-click or run them from a terminal in the repo folder: `projectsetup.bat` once, then `run.bat` to start the app or `build.bat` to produce `dist\WhisperBridge.exe`.
+**Windows (recommended on a new PC):** from the repo folder, run **`projectsetup.bat`** once (creates `.venv` and installs dependencies), then **`run.bat`** to start the app or **`build.bat`** to produce `dist\WhisperBridge.exe`. You can double-click those files in Explorer or run them from `cmd` / PowerShell.
 
 1. Install dependencies: `pip install -r requirements.txt` (or use `projectsetup.bat` above)
 2. Run: `python run.py` (or `python whisper_bridge.py`, or `run.bat`)
@@ -40,7 +40,7 @@ pip install -r requirements.txt -r requirements-build.txt
 python build.py
 ```
 
-Output: `dist/WhisperBridge.exe`. Rebuild after adding Python packages so the bundle stays complete.
+On Windows you can use **`build.bat`** instead (after **`projectsetup.bat`**). Output: `dist/WhisperBridge.exe`. Rebuild after adding Python packages so the bundle stays complete.
 
 ### Troubleshooting
 
@@ -64,7 +64,7 @@ Whisper Bridge est un **widget flottant de reconnaissance vocale pour Windows**.
 
 ### Démarrage rapide
 
-**Windows (nouvel ordinateur) :** si le dépôt contient `projectsetup.bat`, `run.bat` et `build.bat` à la racine, exécutez une fois `projectsetup.bat`, puis `run.bat` ou `build.bat` pour générer `dist\WhisperBridge.exe`.
+**Windows (nouvel ordinateur) :** dans le dossier du dépôt, exécutez une fois **`projectsetup.bat`** (crée `.venv` et installe les dépendances), puis **`run.bat`** pour lancer l'application ou **`build.bat`** pour générer `dist\WhisperBridge.exe`. Double-clic dans l'Explorateur ou exécution depuis `cmd` / PowerShell.
 
 1. Installation : `pip install -r requirements.txt` (ou `projectsetup.bat` ci-dessus)
 2. Lancement : `python run.py` (ou `python whisper_bridge.py`, ou `run.bat`)
@@ -90,7 +90,7 @@ pip install -r requirements.txt -r requirements-build.txt
 python build.py
 ```
 
-Sortie : `dist/WhisperBridge.exe`. Reconstruisez après l'ajout de paquets Python.
+Sous Windows vous pouvez utiliser **`build.bat`** (après **`projectsetup.bat`**). Sortie : `dist/WhisperBridge.exe`. Reconstruisez après l'ajout de paquets Python.
 
 ### Dépannage
 

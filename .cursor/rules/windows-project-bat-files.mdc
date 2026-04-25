@@ -1,0 +1,34 @@
+---
+description: Windows Python repos should include projectsetup.bat, run.bat, build.bat at repo root after clone.
+globs:
+  - "**/requirements*.txt"
+  - "**/*.py"
+alwaysApply: false
+---
+
+# Windows lifecycle scripts (template)
+
+When bootstrapping or reviewing a **Windows-hosted** Python project, ensure the repository root contains:
+
+1. **`projectsetup.bat`** — One-command environment on a fresh clone:
+   - `cd /d "%~dp0"`
+   - Require `python` on PATH (clear error if missing).
+   - If `.venv\Scripts\python.exe` is missing: `python -m venv .venv`
+   - `call .venv\Scripts\activate.bat`
+   - `python -m pip install --upgrade pip`
+   - `pip install -r requirements.txt` and any extra files this project uses (e.g. `requirements-build.txt`).
+
+2. **`run.bat`** — Run the app using the venv:
+   - Error if `.venv` missing (tell user to run `projectsetup.bat`).
+   - `call .venv\Scripts\activate.bat`
+   - `python "%~dp0<ENTRY>.py" %*` where `<ENTRY>` is this project’s launcher (e.g. `run.py`).
+
+3. **`build.bat`** — Run the build driver:
+   - Same venv guard as `run.bat`.
+   - `python "%~dp0<BUILD>.py" %*` (e.g. `build.py`).
+
+Always use **`%~dp0`** so scripts work when double-clicked or run from another directory.
+
+Document the three scripts in **README** Quick start (EN and FR if the project is bilingual).
+
+**Global reuse:** copy this rule into each new repo’s `.cursor/rules/`, or duplicate its content in **Cursor user rules** so every new workspace gets the same reminder.
