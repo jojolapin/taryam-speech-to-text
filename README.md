@@ -14,7 +14,7 @@ Whisper Bridge is a **floating speech-to-text widget for Windows**. It records f
 
 ### Quick start
 
-**Windows (recommended on a new PC):** double-click or run from a terminal in the repo folder: `projectsetup.bat` once, then `run.bat` to start the app or `build.bat` to produce `dist\WhisperBridge.exe`.
+**Windows (recommended on a new PC):** if the repo includes the root scripts `projectsetup.bat`, `run.bat`, and `build.bat`, double-click or run them from a terminal in the repo folder: `projectsetup.bat` once, then `run.bat` to start the app or `build.bat` to produce `dist\WhisperBridge.exe`.
 
 1. Install dependencies: `pip install -r requirements.txt` (or use `projectsetup.bat` above)
 2. Run: `python run.py` (or `python whisper_bridge.py`, or `run.bat`)
@@ -64,7 +64,7 @@ Whisper Bridge est un **widget flottant de reconnaissance vocale pour Windows**.
 
 ### Démarrage rapide
 
-**Windows (nouvel ordinateur) :** dans le dossier du dépôt, exécutez une fois `projectsetup.bat`, puis `run.bat` pour lancer l'application ou `build.bat` pour générer `dist\WhisperBridge.exe`.
+**Windows (nouvel ordinateur) :** si le dépôt contient `projectsetup.bat`, `run.bat` et `build.bat` à la racine, exécutez une fois `projectsetup.bat`, puis `run.bat` ou `build.bat` pour générer `dist\WhisperBridge.exe`.
 
 1. Installation : `pip install -r requirements.txt` (ou `projectsetup.bat` ci-dessus)
 2. Lancement : `python run.py` (ou `python whisper_bridge.py`, ou `run.bat`)
