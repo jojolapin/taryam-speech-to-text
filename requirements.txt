@@ -9,6 +9,8 @@ soundfile
 pyperclip
 pyautogui
 pywin32
+numpy
 
 # Local Whisper (optional; only needed when using Engine → Local Whisper)
 openai-whisper
+faster-whisper

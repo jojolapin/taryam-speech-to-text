@@ -1,0 +1,42 @@
+---
+description: Formal GUI polish for PySide/Qt apps — copyright, help, tooltips, i18n, theme
+globs:
+  - "**/gui/**/*.py"
+  - "**/app.py"
+  - "**/i18n.py"
+  - "**/theme.py"
+  - "**/copyright.py"
+alwaysApply: false
+---
+
+# Formal GUI delivery checklist
+
+When adding or changing a **graphical user interface** (PySide6 / Qt or similar), treat the following as standard deliverables unless the product owner explicitly opts out.
+
+## Copyright and legal
+
+- Keep a **single source of truth** for the copyright holder, years, and product name (e.g. `copyright.py` or equivalent).
+- Surface the **full notice** in **About** and in **long-form docs** (README).
+- Use a **short form** (e.g. `© YEAR Owner`) in window titles, tray tooltips, or splash screens where space is limited.
+- **QSettings** organization/application keys must stay **stable** across releases if tied to user data; document when they may change.
+
+## Help and documentation
+
+- Maintain a **user guide** (Markdown is fine) shipped with the app or in-repo, bilingual if the product requires **en-US** and **fr-FR**.
+- Expose the guide from the UI: **Help / User guide** in the **tray** and/or **About → Open guide**.
+- For **PyInstaller** one-file builds, add the help file to **`datas=`** so it exists under `sys._MEIPASS` at runtime; resolve paths for both dev and frozen modes.
+
+## Tooltips (informative, formal tone)
+
+- Every **button**, **checkbox**, **combo**, and other actionable control should have a **`setToolTip`** (or QAction `setToolTip`) in the **active UI language**.
+- Large **containers** (e.g. draggable panels) may expose a short tooltip explaining drag or status areas.
+- Tooltip text should be **complete sentences**, concise, and free of slang; match the project’s **i18n** layer (no hardcoded UI strings in application code).
+
+## Internationalization and theme
+
+- All user-visible strings (including tooltips and help UI chrome) go through **`tr()`** or equivalent with **en-US** and **fr-FR** entries.
+- **Light / Dark / System** themes and persistence follow product requirements.
+
+## README
+
+- README should link to the **help file path**, describe **run**, **build**, and **troubleshooting**, and repeat the **copyright** line or point to `copyright.py`.
