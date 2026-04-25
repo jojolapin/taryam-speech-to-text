@@ -14,8 +14,10 @@ Whisper Bridge is a **floating speech-to-text widget for Windows**. It records f
 
 ### Quick start
 
-1. Install dependencies: `pip install -r requirements.txt`
-2. Run: `python run.py` (or `python whisper_bridge.py`)
+**Windows (recommended on a new PC):** double-click or run from a terminal in the repo folder: `projectsetup.bat` once, then `run.bat` to start the app or `build.bat` to produce `dist\WhisperBridge.exe`.
+
+1. Install dependencies: `pip install -r requirements.txt` (or use `projectsetup.bat` above)
+2. Run: `python run.py` (or `python whisper_bridge.py`, or `run.bat`)
 3. Click the **microphone** to record; click again to stop. Or use the **global hotkey** (default `f8`, configurable in Settings).
 4. Open **Settings** (gear) for engine, language, theme, microphone, and paste behaviour.
 
@@ -62,8 +64,10 @@ Whisper Bridge est un **widget flottant de reconnaissance vocale pour Windows**.
 
 ### Démarrage rapide
 
-1. Installation : `pip install -r requirements.txt`
-2. Lancement : `python run.py` (ou `python whisper_bridge.py`)
+**Windows (nouvel ordinateur) :** dans le dossier du dépôt, exécutez une fois `projectsetup.bat`, puis `run.bat` pour lancer l'application ou `build.bat` pour générer `dist\WhisperBridge.exe`.
+
+1. Installation : `pip install -r requirements.txt` (ou `projectsetup.bat` ci-dessus)
+2. Lancement : `python run.py` (ou `python whisper_bridge.py`, ou `run.bat`)
 3. Clic sur le **microphone** pour enregistrer ; reclic pour arrêter. Ou utilisez le **raccourci global** (défaut `f8`, réglable dans les paramètres).
 4. **Paramètres** (engrenage) : moteur, langue, thème, micro, collage.
 
