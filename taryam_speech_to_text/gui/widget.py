@@ -46,6 +46,12 @@ WTS_SESSION_LOGON = 0x05
 WTS_SESSION_UNLOCK = 0x08
 NOTIFY_FOR_THIS_SESSION = 0
 
+WIDGET_WIDTH_NORMAL = 280
+WIDGET_HEIGHT_NORMAL = 140
+WIDGET_WIDTH_COMPACT = 168
+WIDGET_HEIGHT_COMPACT = 44
+QT_MAX_WIDGET = 16777215
+
 
 class POINT(ctypes.Structure):
     _fields_ = [("x", wintypes.LONG), ("y", wintypes.LONG)]
@@ -179,6 +185,7 @@ class DictationWidget(QWidget):
         self._apply_theme()
         self.tray = TrayController(self)
         self._wire_tray()
+        self._set_compact_ui(cfg.widget_compact, persist=False)
         self._set_status(tr("status.ready"))
 
     def _apply_hotkey_watchdog_interval(self) -> None:
@@ -262,7 +269,11 @@ class DictationWidget(QWidget):
         self.root.setObjectName("RootFrame")
         root_layout = QVBoxLayout(self.root)
         root_layout.setContentsMargins(12, 10, 12, 10)
-        top = QHBoxLayout()
+        root_layout.setSpacing(6)
+
+        self.top_bar = QWidget()
+        top = QHBoxLayout(self.top_bar)
+        top.setContentsMargins(0, 0, 0, 0)
 
         self.settings_btn = QPushButton("⚙")
         self.settings_btn.clicked.connect(self.open_settings)
@@ -272,10 +283,13 @@ class DictationWidget(QWidget):
         self.mic_btn.clicked.connect(self.toggle_recording)
         self.about_btn = QPushButton("i")
         self.about_btn.clicked.connect(self.show_about)
+        self.compact_btn = QPushButton("▼")
+        self.compact_btn.clicked.connect(self._toggle_compact_mode)
         top.addWidget(self.settings_btn)
         top.addStretch(1)
         top.addWidget(self.mic_btn)
         top.addStretch(1)
+        top.addWidget(self.compact_btn)
         top.addWidget(self.about_btn)
 
         self.status = QLabel("")
@@ -283,22 +297,76 @@ class DictationWidget(QWidget):
         self.level.setRange(0, 100)
         self.level.setValue(0)
         self.level.setTextVisible(False)
-        root_layout.addLayout(top)
+        self._bottom_row_layout = QHBoxLayout()
+        self._bottom_row_layout.setContentsMargins(0, 0, 0, 0)
+        self._bottom_row_layout.setSpacing(6)
+        self._bottom_row_layout.addWidget(self.level, 1)
+
+        root_layout.addWidget(self.top_bar)
         root_layout.addWidget(self.status)
-        root_layout.addWidget(self.level)
+        root_layout.addLayout(self._bottom_row_layout)
 
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(26)
         shadow.setOffset(0, 5)
         self.root.setGraphicsEffect(shadow)
         outer.addWidget(self.root)
+        self._outer_layout = outer
+        self._root_layout = root_layout
+        self._top_layout = top
         self._refresh_mic_tooltip()
+
+    def _toggle_compact_mode(self) -> None:
+        self._set_compact_ui(not self.cfg.widget_compact)
+
+    def _on_tray_compact_toggled(self, checked: bool) -> None:
+        self._set_compact_ui(checked)
+
+    def _set_compact_ui(self, compact: bool, *, persist: bool = True) -> None:
+        self.cfg.widget_compact = compact
+        self.compact_btn.setText("▲" if compact else "▼")
+        self.compact_btn.setToolTip(tr("tooltip.widget.full_mode") if compact else tr("tooltip.widget.compact_mode"))
+        if compact:
+            self._top_layout.removeWidget(self.compact_btn)
+            self._bottom_row_layout.addWidget(self.compact_btn, 0, Qt.AlignmentFlag.AlignVCenter)
+            self.top_bar.setVisible(False)
+            self.status.setVisible(False)
+            self._outer_layout.setContentsMargins(4, 4, 4, 4)
+            self._root_layout.setContentsMargins(6, 4, 6, 4)
+            self._root_layout.setSpacing(0)
+            self._bottom_row_layout.setSpacing(4)
+            self.setFixedSize(WIDGET_WIDTH_COMPACT, WIDGET_HEIGHT_COMPACT)
+            self.level.setFixedHeight(10)
+            self.compact_btn.setFixedSize(22, 22)
+        else:
+            self._bottom_row_layout.removeWidget(self.compact_btn)
+            idx = self._top_layout.indexOf(self.about_btn)
+            self._top_layout.insertWidget(idx, self.compact_btn)
+            self.top_bar.setVisible(True)
+            self.status.setVisible(True)
+            self._outer_layout.setContentsMargins(8, 8, 8, 8)
+            self._root_layout.setContentsMargins(12, 10, 12, 10)
+            self._root_layout.setSpacing(6)
+            self._bottom_row_layout.setSpacing(6)
+            self.setFixedSize(WIDGET_WIDTH_NORMAL, WIDGET_HEIGHT_NORMAL)
+            self.level.setMinimumHeight(0)
+            self.level.setMaximumHeight(QT_MAX_WIDGET)
+            self.compact_btn.setMinimumSize(0, 0)
+            self.compact_btn.setMaximumSize(QT_MAX_WIDGET, QT_MAX_WIDGET)
+        self.tray.compact_widget.blockSignals(True)
+        self.tray.compact_widget.setChecked(compact)
+        self.tray.compact_widget.blockSignals(False)
+        if persist:
+            self.store.save(self.cfg)
 
     def _apply_widget_tooltips(self) -> None:
         self.settings_btn.setToolTip(tr("tooltip.widget.settings"))
         self.about_btn.setToolTip(tr("tooltip.widget.about"))
         self.status.setToolTip(tr("tooltip.widget.status"))
         self.level.setToolTip(tr("tooltip.widget.level"))
+        self.compact_btn.setToolTip(
+            tr("tooltip.widget.full_mode") if self.cfg.widget_compact else tr("tooltip.widget.compact_mode")
+        )
         self.root.setToolTip(tr("tooltip.widget.surface"))
 
     def _refresh_mic_tooltip(self) -> None:
@@ -312,6 +380,7 @@ class DictationWidget(QWidget):
     def _wire_tray(self):
         self.tray.start_stop.triggered.connect(self.toggle_recording)
         self.tray.show_hide.triggered.connect(self.toggle_visibility)
+        self.tray.compact_widget.triggered.connect(self._on_tray_compact_toggled)
         self.tray.settings.triggered.connect(self.open_settings)
         self.tray.help.triggered.connect(self.show_user_guide)
         self.tray.about.triggered.connect(self.show_about)
@@ -465,6 +534,7 @@ class DictationWidget(QWidget):
     def _reset_defaults(self):
         self.cfg = AppConfig()
         self.store.save(self.cfg)
+        self._set_compact_ui(self.cfg.widget_compact, persist=False)
         self._apply_theme()
         self.hotkey.set_hotkey(self.cfg.hotkey)
         self._apply_hotkey_watchdog_interval()

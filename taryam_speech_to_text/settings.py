@@ -27,6 +27,7 @@ class AppConfig:
     max_record_seconds: int = 300
     widget_x: int = 200
     widget_y: int = 200
+    widget_compact: bool = False
     output_dir: str = str(Path.home() / "Documents" / "WhisperBridgeOutput")
 
 
@@ -50,6 +51,7 @@ class SettingsStore:
         cfg.max_record_seconds = int(self._qs.value("max_record_seconds", cfg.max_record_seconds))
         cfg.widget_x = int(self._qs.value("widget_x", cfg.widget_x))
         cfg.widget_y = int(self._qs.value("widget_y", cfg.widget_y))
+        cfg.widget_compact = self._qs.value("widget_compact", cfg.widget_compact, bool)
         cfg.output_dir = self._qs.value("output_dir", cfg.output_dir)
         if cfg.ui_language == "system":
             cfg.ui_language = detect_system_locale()
@@ -77,6 +79,7 @@ class SettingsStore:
         self._qs.setValue("max_record_seconds", cfg.max_record_seconds)
         self._qs.setValue("widget_x", cfg.widget_x)
         self._qs.setValue("widget_y", cfg.widget_y)
+        self._qs.setValue("widget_compact", cfg.widget_compact)
         self._qs.setValue("output_dir", cfg.output_dir)
         self._qs.setValue("settings_version", SETTINGS_VERSION)
 

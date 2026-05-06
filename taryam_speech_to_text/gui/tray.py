@@ -32,6 +32,9 @@ class TrayController:
         self.start_stop.setToolTip(tr("tooltip.menu.start_stop"))
         self.show_hide = QAction(tr("menu.show_hide"), parent)
         self.show_hide.setToolTip(tr("tooltip.menu.show_hide"))
+        self.compact_widget = QAction(tr("menu.compact_widget"), parent)
+        self.compact_widget.setCheckable(True)
+        self.compact_widget.setToolTip(tr("tooltip.menu.compact_widget"))
         self.settings = QAction(tr("menu.settings"), parent)
         self.settings.setToolTip(tr("tooltip.menu.settings"))
         self.help = QAction(tr("menu.help"), parent)
@@ -43,6 +46,7 @@ class TrayController:
 
         self.menu.addAction(self.start_stop)
         self.menu.addAction(self.show_hide)
+        self.menu.addAction(self.compact_widget)
         self.menu.addSeparator()
         self.menu.addAction(self.settings)
         self.menu.addAction(self.help)

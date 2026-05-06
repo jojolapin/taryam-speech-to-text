@@ -20,6 +20,7 @@ STRINGS = {
     "menu.about": {EN_US: "About", FR_FR: "A propos"},
     "menu.help": {EN_US: "User guide...", FR_FR: "Guide utilisateur..."},
     "menu.show_hide": {EN_US: "Show / Hide Widget", FR_FR: "Afficher / Cacher le widget"},
+    "menu.compact_widget": {EN_US: "Compact widget view", FR_FR: "Vue compacte du widget"},
     "menu.start_stop": {EN_US: "Start / Stop Recording", FR_FR: "Demarrer / Arreter"},
     "help.title": {EN_US: "User guide", FR_FR: "Guide utilisateur"},
     "help.close": {EN_US: "Close", FR_FR: "Fermer"},
@@ -101,6 +102,14 @@ STRINGS = {
         EN_US: "Drag this area to move the widget. Position is saved automatically.",
         FR_FR: "Glissez cette zone pour déplacer le widget. La position est enregistrée automatiquement.",
     },
+    "tooltip.widget.compact_mode": {
+        EN_US: "Switch to a slim bar with the level meter only. Use the tray or your global hotkey to record.",
+        FR_FR: "Passer a une fine barre avec l'indicateur de niveau seulement. Utilisez la zone de notification ou le raccourci global pour enregistrer.",
+    },
+    "tooltip.widget.full_mode": {
+        EN_US: "Restore the full widget with settings, status text, and About.",
+        FR_FR: "Restaurer le widget complet : parametres, texte d'etat et A propos.",
+    },
     # --- Tooltips: tray ---
     "tooltip.tray.icon": {
         EN_US: "Whisper Bridge — right-click for menu (record, settings, guide, about, quit).",
@@ -113,6 +122,10 @@ STRINGS = {
     "tooltip.menu.show_hide": {
         EN_US: "Show or hide the floating dictation widget.",
         FR_FR: "Afficher ou masquer le widget flottant de dictée.",
+    },
+    "tooltip.menu.compact_widget": {
+        EN_US: "Use a slim level-meter bar, or restore the full widget. Start and stop recording from the tray or the global hotkey.",
+        FR_FR: "Utiliser une fine barre de niveau, ou restaurer le widget complet. Demarrer et arreter depuis la zone de notification ou le raccourci global.",
     },
     "tooltip.menu.settings": {
         EN_US: "Open the full settings dialog.",
