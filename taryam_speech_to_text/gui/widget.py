@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import ctypes
 import os
-import time
+from collections.abc import Callable
+from ctypes import wintypes
 from datetime import datetime
 
 import win32gui
 import win32process
 from dotenv import set_key
-from PySide6.QtCore import QPoint, QThread, QTimer, Qt, Signal
-from PySide6.QtGui import QCursor
+from PySide6.QtCore import QAbstractNativeEventFilter, QPoint, QThread, QTimer, Qt, Signal
+from PySide6.QtGui import QCloseEvent, QCursor, QGuiApplication, QShowEvent
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -33,6 +35,64 @@ from taryam_speech_to_text.paste.win import PasteController, get_focused_control
 from taryam_speech_to_text.settings import AppConfig, SettingsStore
 from taryam_speech_to_text.theme import stylesheet_for_theme
 from taryam_speech_to_text.transcription.registry import get_engine
+
+WM_POWERBROADCAST = 0x0218
+PBT_APMRESUMECRITICAL = 0x07
+PBT_APMRESUMESUSPEND = 0x08
+PBT_APMRESUMESTANDBY = 0x09
+PBT_APMRESUMEAUTOMATIC = 0x12
+WM_WTSSESSION_CHANGE = 0x02B1
+WTS_SESSION_LOGON = 0x05
+WTS_SESSION_UNLOCK = 0x08
+NOTIFY_FOR_THIS_SESSION = 0
+
+
+class POINT(ctypes.Structure):
+    _fields_ = [("x", wintypes.LONG), ("y", wintypes.LONG)]
+
+
+class MSG(ctypes.Structure):
+    _fields_ = [
+        ("hwnd", wintypes.HWND),
+        ("message", wintypes.UINT),
+        ("wParam", wintypes.WPARAM),
+        ("lParam", wintypes.LPARAM),
+        ("time", wintypes.DWORD),
+        ("pt", POINT),
+    ]
+
+
+class _SessionResumeNativeFilter(QAbstractNativeEventFilter):
+    """Catches session unlock / power resume app-wide (Tool windows may miss these in nativeEvent)."""
+
+    def __init__(self, schedule_resume: Callable[[], None]) -> None:
+        super().__init__()
+        self._schedule_resume = schedule_resume
+
+    def nativeEventFilter(self, event_type, message):
+        try:
+            et = bytes(event_type).lower()
+        except TypeError:
+            return False, 0
+        if et != b"windows_generic_msg":
+            return False, 0
+        try:
+            msg = MSG.from_address(int(message))
+        except (TypeError, ValueError):
+            return False, 0
+        if msg.message == WM_POWERBROADCAST and msg.wParam in (
+            PBT_APMRESUMESUSPEND,
+            PBT_APMRESUMESTANDBY,
+            PBT_APMRESUMEAUTOMATIC,
+            PBT_APMRESUMECRITICAL,
+        ):
+            self._schedule_resume()
+        elif msg.message == WM_WTSSESSION_CHANGE and msg.wParam in (WTS_SESSION_UNLOCK, WTS_SESSION_LOGON):
+            self._schedule_resume()
+        return False, 0
+
+
+WM_HOTKEY = 0x0312
 
 
 class WorkerThread(QThread):
@@ -67,6 +127,7 @@ class DictationWidget(QWidget):
         self._worker = None
         self._pulse = 0
         self._dot = ""
+        self._wts_registered = False
 
         self.capture = AudioCapture(
             CaptureConfig(rate=16000, channels=1, max_record_seconds=cfg.max_record_seconds, mic_device=cfg.mic_device)
@@ -79,6 +140,23 @@ class DictationWidget(QWidget):
         self.hotkey.pressed.connect(self.toggle_recording)
         self.hotkey.error.connect(lambda _: self._set_status(f"{tr('status.error')}: {tr('error.hotkey')}"))
         self.hotkey.set_hotkey(cfg.hotkey)
+
+        self._hotkey_resume_timer = QTimer(self)
+        self._hotkey_resume_timer.setSingleShot(True)
+        self._hotkey_resume_timer.timeout.connect(self._reregister_hotkey_if_idle)
+        self._hotkey_delayed_resume = QTimer(self)
+        self._hotkey_delayed_resume.setSingleShot(True)
+        self._hotkey_delayed_resume.timeout.connect(self._delayed_hotkey_refresh)
+        self._hotkey_watchdog = QTimer(self)
+        self._hotkey_watchdog.timeout.connect(self._schedule_hotkey_resume)
+        self._apply_hotkey_watchdog_interval()
+        app_inst = QGuiApplication.instance()
+        if app_inst is not None:
+            app_inst.applicationStateChanged.connect(self._on_application_state_changed)
+            self._session_resume_filter = _SessionResumeNativeFilter(self._schedule_hotkey_resume)
+            app_inst.installNativeEventFilter(self._session_resume_filter)
+        else:
+            self._session_resume_filter = None
 
         self._status_timer = QTimer(self)
         self._status_timer.timeout.connect(self._tick_status)
@@ -102,6 +180,79 @@ class DictationWidget(QWidget):
         self.tray = TrayController(self)
         self._wire_tray()
         self._set_status(tr("status.ready"))
+
+    def _apply_hotkey_watchdog_interval(self) -> None:
+        self._hotkey_watchdog.stop()
+        m = self.cfg.hotkey_watchdog_minutes
+        if m > 0:
+            self._hotkey_watchdog.start(m * 60 * 1000)
+
+    def _on_application_state_changed(self, state: Qt.ApplicationState) -> None:
+        if state == Qt.ApplicationState.ApplicationActive:
+            self._schedule_hotkey_resume()
+
+    def _schedule_hotkey_resume(self) -> None:
+        if not self._hotkey_resume_timer.isActive():
+            self._hotkey_resume_timer.start(450)
+        self._hotkey_delayed_resume.stop()
+        self._hotkey_delayed_resume.start(2500)
+
+    def _delayed_hotkey_refresh(self) -> None:
+        if self.capture.recording:
+            return
+        self.hotkey.refresh()
+
+    def _reregister_hotkey_if_idle(self) -> None:
+        if self.capture.recording:
+            return
+        self.hotkey.refresh()
+
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        try:
+            hwnd = int(self.winId())
+            if hwnd:
+                self.hotkey.set_native_host_hwnd(hwnd)
+        except Exception:
+            pass
+        if self._wts_registered:
+            return
+        try:
+            hwnd = int(self.winId())
+            if hwnd and ctypes.windll.user32.WTSRegisterSessionNotification(hwnd, NOTIFY_FOR_THIS_SESSION):
+                self._wts_registered = True
+        except Exception:
+            pass
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        app_inst = QGuiApplication.instance()
+        if app_inst is not None and getattr(self, "_session_resume_filter", None) is not None:
+            try:
+                app_inst.removeNativeEventFilter(self._session_resume_filter)
+            except Exception:
+                pass
+            self._session_resume_filter = None
+        if self._wts_registered:
+            try:
+                ctypes.windll.user32.WTSUnRegisterSessionNotification(int(self.winId()))
+            except Exception:
+                pass
+            self._wts_registered = False
+        super().closeEvent(event)
+
+    def nativeEvent(self, event_type, message):
+        try:
+            et = bytes(event_type).lower()
+        except TypeError:
+            et = b""
+        if et == b"windows_generic_msg":
+            try:
+                msg = MSG.from_address(int(message))
+            except (TypeError, ValueError):
+                return super().nativeEvent(event_type, message)
+            if msg.message == WM_HOTKEY and msg.wParam == GlobalHotkey.win_hotkey_id():
+                self.hotkey.pressed.emit()
+        return super().nativeEvent(event_type, message)
 
     def _build_ui(self):
         outer = QVBoxLayout(self)
@@ -288,6 +439,7 @@ class DictationWidget(QWidget):
             set_key(env_path, "GEMINI_API_KEY", dlg.gemini_key.text().strip())
             self.store.save(self.cfg)
             self.hotkey.set_hotkey(self.cfg.hotkey)
+            self._apply_hotkey_watchdog_interval()
             self.capture.cfg.mic_device = self.cfg.mic_device
             self._apply_theme()
 
@@ -314,6 +466,8 @@ class DictationWidget(QWidget):
         self.cfg = AppConfig()
         self.store.save(self.cfg)
         self._apply_theme()
+        self.hotkey.set_hotkey(self.cfg.hotkey)
+        self._apply_hotkey_watchdog_interval()
 
     def show_about(self):
         AboutDialog().exec()

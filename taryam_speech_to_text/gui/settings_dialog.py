@@ -63,6 +63,9 @@ class SettingsDialog(QDialog):
         self.theme_combo.setCurrentIndex(max(0, self.theme_combo.findData(cfg.theme)))
 
         self.hotkey_edit = QLineEdit(cfg.hotkey)
+        self.hotkey_watchdog = QSpinBox()
+        self.hotkey_watchdog.setRange(0, 120)
+        self.hotkey_watchdog.setValue(cfg.hotkey_watchdog_minutes)
         self.device_combo = QComboBox()
         self.device_combo.addItem("(default)", "")
         for name in list_input_devices():
@@ -93,6 +96,7 @@ class SettingsDialog(QDialog):
         form.addRow(QLabel(tr("settings.ui_language")), self.ui_lang_combo)
         form.addRow(QLabel(tr("settings.theme")), self.theme_combo)
         form.addRow(QLabel(tr("settings.hotkey")), self.hotkey_edit)
+        form.addRow(QLabel(tr("settings.hotkey_watchdog")), self.hotkey_watchdog)
         form.addRow(QLabel(tr("settings.device")), self.device_combo)
         form.addRow(QLabel(tr("settings.auto_paste")), self.auto_paste_check)
         form.addRow(QLabel(tr("settings.preserve_clipboard")), self.preserve_check)
@@ -127,6 +131,7 @@ class SettingsDialog(QDialog):
         self.ui_lang_combo.setToolTip(tr("tooltip.settings.ui_lang"))
         self.theme_combo.setToolTip(tr("tooltip.settings.theme"))
         self.hotkey_edit.setToolTip(tr("tooltip.settings.hotkey"))
+        self.hotkey_watchdog.setToolTip(tr("tooltip.settings.hotkey_watchdog"))
         self.device_combo.setToolTip(tr("tooltip.settings.device"))
         self.auto_paste_check.setToolTip(tr("tooltip.settings.auto_paste"))
         self.preserve_check.setToolTip(tr("tooltip.settings.preserve_clipboard"))
@@ -146,6 +151,7 @@ class SettingsDialog(QDialog):
         cfg.ui_language = self.ui_lang_combo.currentData()
         cfg.theme = self.theme_combo.currentData()
         cfg.hotkey = self.hotkey_edit.text().strip().lower() or "f8"
+        cfg.hotkey_watchdog_minutes = int(self.hotkey_watchdog.value())
         cfg.mic_device = self.device_combo.currentData()
         cfg.auto_paste = self.auto_paste_check.isChecked()
         cfg.preserve_clipboard = self.preserve_check.isChecked()

@@ -38,6 +38,10 @@ STRINGS = {
     "settings.ui_language": {EN_US: "UI language", FR_FR: "Langue de l'interface"},
     "settings.theme": {EN_US: "Theme", FR_FR: "Theme"},
     "settings.hotkey": {EN_US: "Global hotkey", FR_FR: "Raccourci global"},
+    "settings.hotkey_watchdog": {
+        EN_US: "Hotkey refresh interval (minutes, 0 = off)",
+        FR_FR: "Intervalle de rafraichissement du raccourci (minutes, 0 = desactive)",
+    },
     "settings.device": {EN_US: "Microphone", FR_FR: "Microphone"},
     "settings.auto_paste": {EN_US: "Auto paste into target window", FR_FR: "Coller automatiquement dans la fenetre cible"},
     "settings.preserve_clipboard": {EN_US: "Restore previous clipboard after paste", FR_FR: "Restaurer l'ancien presse-papiers apres collage"},
@@ -168,8 +172,12 @@ STRINGS = {
         FR_FR: "Thème visuel : suivre Windows, toujours clair ou toujours sombre.",
     },
     "tooltip.settings.hotkey": {
-        EN_US: "Global keyboard shortcut to start/stop recording (e.g. f8, ctrl+shift+r).",
-        FR_FR: "Raccourci clavier global pour démarrer/arrêter (ex. f8, ctrl+shift+r).",
+        EN_US: "Global keyboard shortcut to start/stop recording (e.g. f8, ctrl+shift+r). On Windows, simple shortcuts use RegisterHotKey (reliable after Win+L); multi-step combos use the keyboard hook.",
+        FR_FR: "Raccourci global pour démarrer/arrêter (ex. f8, ctrl+shift+r). Sous Windows, les raccourcis simples utilisent RegisterHotKey (fiable après Win+L) ; les combinaisons multi-étapes utilisent le hook clavier.",
+    },
+    "tooltip.settings.hotkey_watchdog": {
+        EN_US: "Re-registers the global hotkey on this interval so it keeps working after sleep or when Windows drops the keyboard hook. Set to 0 to disable (resume/unlock still refreshes the hotkey).",
+        FR_FR: "Re-enregistre le raccourci global a cet intervalle pour qu'il reste actif apres veille ou si Windows perd le hook clavier. 0 pour desactiver (reprise/deverrouillage rafraichit quand meme).",
     },
     "tooltip.settings.device": {
         EN_US: "Audio input device used for recording, or default system microphone.",

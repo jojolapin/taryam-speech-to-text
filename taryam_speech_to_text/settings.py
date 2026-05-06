@@ -20,6 +20,7 @@ class AppConfig:
     ui_language: str = "system"
     theme: str = "system"
     hotkey: str = "f8"
+    hotkey_watchdog_minutes: int = 5
     mic_device: str = ""
     auto_paste: bool = True
     preserve_clipboard: bool = False
@@ -42,6 +43,7 @@ class SettingsStore:
         cfg.ui_language = self._qs.value("ui_language", cfg.ui_language)
         cfg.theme = self._qs.value("theme", cfg.theme)
         cfg.hotkey = self._qs.value("hotkey", cfg.hotkey)
+        cfg.hotkey_watchdog_minutes = int(self._qs.value("hotkey_watchdog_minutes", cfg.hotkey_watchdog_minutes))
         cfg.mic_device = self._qs.value("mic_device", cfg.mic_device)
         cfg.auto_paste = self._qs.value("auto_paste", cfg.auto_paste, bool)
         cfg.preserve_clipboard = self._qs.value("preserve_clipboard", cfg.preserve_clipboard, bool)
@@ -68,6 +70,7 @@ class SettingsStore:
         self._qs.setValue("ui_language", cfg.ui_language)
         self._qs.setValue("theme", cfg.theme)
         self._qs.setValue("hotkey", cfg.hotkey)
+        self._qs.setValue("hotkey_watchdog_minutes", cfg.hotkey_watchdog_minutes)
         self._qs.setValue("mic_device", cfg.mic_device)
         self._qs.setValue("auto_paste", cfg.auto_paste)
         self._qs.setValue("preserve_clipboard", cfg.preserve_clipboard)

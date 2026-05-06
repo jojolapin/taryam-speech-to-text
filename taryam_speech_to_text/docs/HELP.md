@@ -31,7 +31,8 @@ Each successful transcription is also saved as a **`.txt` file** in your configu
 - **Transcription language**: **Auto**, **English**, or **French** (hint for the recognizer).
 - **UI language**: **English** or **Français** for menus, dialogs, and tooltips.
 - **Theme**: **System**, **Light**, or **Dark**.
-- **Global hotkey**: Key name understood by the `keyboard` library (e.g. `f8`, `ctrl+shift+r`). If registration fails, try another shortcut or run with appropriate permissions.
+- **Global hotkey**: e.g. `f8`, `ctrl+shift+r`. On Windows, **single-step** shortcuts (one key or one chord like `ctrl+shift+r`) use **RegisterHotKey**, which keeps working after **Win+L** lock/unlock. **Multi-step** sequences (comma-separated) still use the `keyboard` hook and may need a shorter **Hotkey refresh interval** or an app restart if they stop firing.
+- **Hotkey refresh interval (minutes)**: Default **5** — periodically re-registers the global shortcut so it keeps working after sleep/hibernate or if Windows drops the low-level keyboard hook. Set to **0** to turn off only the timer (the app still re-registers after **resume from sleep** and **session unlock**).
 - **Microphone**: Choose an input device or **(default)**.
 - **Auto paste**: If enabled, the app tries to **focus the target window** (using Windows input attachment, not synthetic Alt keys), then pastes: **WM_PASTE** for classic Win32 edit controls (e.g. Notepad, Notepad++), otherwise **Ctrl+V**. If disabled, text is only placed on the **clipboard**.
 - **Restore previous clipboard**: **Off by default.** If enabled, the previous clipboard is restored **about 3 seconds after a successful auto-paste only**. If focus or paste fails, the transcript **stays** on the clipboard so you can press **Ctrl+V** manually.
@@ -95,7 +96,8 @@ Chaque transcription réussie est aussi enregistrée en **fichier `.txt`** dans 
 - **Langue de transcription** : **Auto**, **Anglais** ou **Français** (indication pour le reconnaisseur).
 - **Langue de l'interface** : **English** ou **Français** pour menus, boîtes de dialogue et infobulles.
 - **Thème** : **Système**, **Clair** ou **Sombre**.
-- **Raccourci global** : nom de touche reconnu par la bibliothèque `keyboard` (ex. `f8`, `ctrl+shift+r`). En cas d'échec d'enregistrement, changez de raccourci ou lancez avec les permissions adaptées.
+- **Raccourci global** : ex. `f8`, `ctrl+shift+r`. Sous Windows, les raccourcis **en une étape** utilisent **RegisterHotKey** (fiable après **Win+L**). Les séquences **multi-étapes** (séparées par des virgules) utilisent encore le hook `keyboard` ; raccourcir l'**intervalle de rafraîchissement** ou redémarrer l'application si besoin.
+- **Intervalle de rafraîchissement du raccourci (minutes)** : par défaut **5** — ré-enregistre périodiquement le raccourci global pour qu'il reste actif après veille/hibernation ou si Windows perd le hook clavier. **0** désactive seulement la minuterie (reprise de veille et déverrouillage de session ré-enregistrent quand même).
 - **Microphone** : périphérique d'entrée ou **(default)**.
 - **Collage automatique** : si activé, l'application tente de **donner le focus à la fenêtre cible** (attachement d'entrée Windows, sans touche Alt synthétique), puis colle : **WM_PASTE** pour les champs d'édition Win32 classiques (ex. Bloc-notes, Notepad++), sinon **Ctrl+V**. Sinon, le texte est uniquement dans le **presse-papiers**.
 - **Restaurer le presse-papiers** : **désactivé par défaut.** Si activé, l'ancien contenu est restauré **environ 3 secondes après un collage automatique réussi uniquement**. Si le focus ou le collage échoue, la transcription **reste** dans le presse-papiers pour un **Ctrl+V** manuel.

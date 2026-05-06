@@ -24,6 +24,7 @@ a = Analysis(
         "pyperclip",
         "pyautogui",
         "keyboard",
+        "taryam_speech_to_text.hotkey_win32",
         "win32gui",
         "win32con",
         "win32process",
